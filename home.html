@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}Home — E-Library Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+  .hero {
+    min-height: calc(100vh - var(--topbar-h));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 40px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 80% 50%, rgba(196,164,132,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(62,39,35,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    max-width: 580px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(196,164,132,0.15);
+    border: 1px solid var(--brand-gold);
+    color: var(--brand-mid);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    color: var(--brand-dark);
+    line-height: 1.15;
+    margin-bottom: 18px;
+  }
+
+  [data-theme="dark"] .hero-title { color: var(--brand-gold); }
+
+  .hero-title span {
+    color: var(--brand-accent);
+    position: relative;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 460px;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .hero-stat-item .number {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--brand-dark);
+  }
+  [data-theme="dark"] .hero-stat-item .number { color: var(--brand-gold); }
+  .hero-stat-item .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  /* Features section */
+  .features {
+    padding: 60px 0 20px;
+  }
+
+  .section-label {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .section-label h2 {
+    font-size: 1.7rem;
+    color: var(--brand-dark);
+    margin-bottom: 8px;
+  }
+  [data-theme="dark"] .section-label h2 { color: var(--brand-gold); }
+  .section-label p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+  }
+
+  .feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 26px;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand-gold), var(--brand-accent));
+    transform: scaleX(0);
+    transition: transform var(--transition);
+    transform-origin: left;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .feature-card:hover::before { transform: scaleX(1); }
+
+  .feature-icon {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+  }
+
+  .feature-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--brand-dark);
+    margin-bottom: 8px;
+  }
+  [data-theme="dark"] .feature-card h3 { color: var(--brand-gold); }
+
+  .feature-card p {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Slideshow books */
+  .books-showcase {
+    padding: 20px 0 40px;
+  }
+
+  .books-marquee-wrap {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  }
+
+  .books-marquee {
+    display: flex;
+    gap: 14px;
+    animation: marquee 20s linear infinite;
+    width: max-content;
+  }
+  .books-marquee:hover { animation-play-state: paused; }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .book-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+  }
+  .book-chip:hover {
+    background: var(--brand-dark);
+    color: var(--brand-gold);
+    border-color: var(--brand-dark);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <i class="fas fa-book-open"></i>
+      E-Library Management System
+    </div>
+
+    <h1 class="hero-title">
+      Your Digital<br>
+      <span>Library</span> Portal
+    </h1>
+
+    <p class="hero-desc">
+      Browse thousands of books, manage your borrowings, and explore knowledge — all in one elegant, modern platform.
+    </p>
+
+    <div class="hero-cta">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg">
+          <i class="fas fa-tachometer-alt"></i> My Dashboard
+        </a>
+        <a href="{{ url_for('main.search') }}" class="btn btn-outline btn-lg">
+          <i class="fas fa-search"></i> Browse Books
+        </a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+          <i class="fas fa-user-plus"></i> Get Started
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-lg">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat-item">
+        <div class="number">{{ total_books }}+</div>
+        <div class="label">Books</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="number">{{ total_users }}+</div>
+        <div class="label">Members</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="number">{{ categories }}+</div>
+        <div class="label">Categories</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Marquee -->
+<div class="books-marquee-wrap" style="margin-bottom:40px">
+  <div class="books-marquee">
+    {% set chips = ['📖 Horror', '🚀 Sci-Fi', '😂 Comedy', '🔍 Thriller',
+                    '📚 Encyclopedia', '💕 Romance', '🏛️ History', '🧠 Self-Help',
+                    '💻 Technology', '🌿 Biography',
+                    '📖 Horror', '🚀 Sci-Fi', '😂 Comedy', '🔍 Thriller',
+                    '📚 Encyclopedia', '💕 Romance', '🏛️ History', '🧠 Self-Help',
+                    '💻 Technology', '🌿 Biography'] %}
+    {% for chip in chips %}
+    <a href="{{ url_for('main.search') }}" class="book-chip">{{ chip }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Features -->
+<div class="features">
+  <div class="section-label">
+    <h2>Everything You Need</h2>
+    <p>A complete library management experience</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <h3>Smart Search</h3>
+      <p>Find books by name, author, or category instantly with powerful filtering.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <h3>Borrow Tracking</h3>
+      <p>Track all your borrowed books, due dates, and history in one place.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Instant Notifications</h3>
+      <p>Get alerts for due dates, returns, fines, and library updates automatically.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <h3>Secure & Private</h3>
+      <p>Your data is protected with hashed passwords and secure session management.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Admin Analytics</h3>
+      <p>Admins get real-time dashboards with charts, stats, and insights.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⭐</div>
+      <h3>Reviews & Ratings</h3>
+      <p>Share your thoughts on books and read reviews from fellow readers.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

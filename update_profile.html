@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile — E-Library{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-wrap {
+    max-width: 540px; margin: 0 auto;
+  }
+  .profile-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .profile-header {
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand-mid));
+    padding: 36px 32px;
+    text-align: center;
+  }
+  .profile-avatar {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-accent));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 700; color: white;
+    margin: 0 auto 14px;
+    border: 3px solid rgba(255,255,255,0.2);
+  }
+  .profile-header h2 { color: white; font-size: 1.2rem; margin-bottom: 4px; }
+  .profile-header p  { color: rgba(255,255,255,0.5); font-size: 0.82rem; }
+  .profile-body { padding: 32px; }
+  .current-info {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+  }
+  .current-info .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 0;
+    color: var(--text-muted);
+  }
+  .current-info .row strong { color: var(--text-primary); }
+  .input-icon-wrap { position: relative; }
+  .input-icon-wrap .form-control { padding-left: 40px; }
+  .input-icon-wrap .icon-left {
+    position: absolute; left: 13px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted); font-size: 0.85rem; pointer-events: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Edit Profile</h1>
+    <div class="breadcrumb">
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+      Edit Profile
+    </div>
+  </div>
+</div>
+
+<div class="profile-wrap">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="profile-avatar">{{ current_user.fname[0].upper() }}</div>
+      <h2>{{ current_user.fname }}</h2>
+      <p>@{{ current_user.username }} · {{ current_user.email }}</p>
+    </div>
+
+    <div class="profile-body">
+      <div class="current-info">
+        <div class="row">
+          <span>Current Username</span>
+          <strong>{{ current_user.username }}</strong>
+        </div>
+        <div class="row">
+          <span>Current Email</span>
+          <strong>{{ current_user.email }}</strong>
+        </div>
+        <div class="row">
+          <span>Member since</span>
+          <strong>{{ current_user.created_at.strftime('%d %b %Y') }}</strong>
+        </div>
+      </div>
+
+      <form action="{{ url_for('main.update_profile') }}" method="POST">
+        <div class="form-group">
+          <label class="form-label">New Email Address</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-envelope icon-left"></i>
+            <input class="form-control" type="email" name="new_email"
+                   placeholder="New email address"
+                   value="{{ current_user.email }}" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">New Username</label>
+          <div class="input-icon-wrap">
+            <i class="fas fa-user icon-left"></i>
+            <input class="form-control" type="text" name="new_username"
+                   placeholder="New username"
+                   value="{{ current_user.username }}" required />
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:12px">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+          <a href="{{ url_for('main.dashboard') }}"
+             class="btn btn-outline" style="flex:1;justify-content:center;padding:12px">
+            <i class="fas fa-times"></i> Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

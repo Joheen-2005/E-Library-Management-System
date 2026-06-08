@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}{{ book.bname }} — E-Library{% endblock %}
+
+{% block extra_css %}
+<style>
+  .book-detail-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 24px;
+  }
+  .book-hero {
+    height: 180px;
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand-mid), var(--brand-accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; position: relative;
+  }
+  .book-detail-body { padding: 28px; }
+  .book-meta-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px; margin: 20px 0;
+  }
+  .meta-chip {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+  .meta-chip .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .meta-chip .value { font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin-top: 3px; }
+
+  .stars { display: flex; gap: 3px; }
+  .star { font-size: 1rem; cursor: pointer; color: var(--border-color); }
+  .star.filled { color: #f39c12; }
+  .star:hover, .star:hover ~ .star { color: #f39c12; }
+
+  .review-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    border-left: 3px solid var(--brand-gold);
+    margin-bottom: 10px;
+  }
+  .review-card .reviewer { font-size: 0.82rem; font-weight: 700; color: var(--brand-mid); }
+  .review-card .comment  { font-size: 0.85rem; color: var(--text-primary); margin-top: 5px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Book Details</h1>
+    <div class="breadcrumb">
+      <a href="{{ url_for('main.home') }}">Home</a>
+      <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+      <a href="{{ url_for('main.search') }}">Search</a>
+      <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+      {{ book.bname }}
+    </div>
+  </div>
+  <a href="{{ url_for('main.search') }}" class="btn btn-outline btn-sm">
+    <i class="fas fa-arrow-left"></i> Back
+  </a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
+  <!-- Left: Book info -->
+  <div>
+    <div class="book-detail-card">
+      <div class="book-hero">📖</div>
+      <div class="book-detail-body">
+        <h2 style="font-size:1.5rem;margin-bottom:6px">{{ book.bname }}</h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px">by {{ book.aname }}</p>
+
+        {% if avg_rating > 0 %}
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <div class="stars">
+            {% for i in range(1,6) %}
+            <span class="star {% if i <= avg_rating %}filled{% endif %}">★</span>
+            {% endfor %}
+          </div>
+          <span style="font-size:0.85rem;color:var(--text-muted)">{{ avg_rating }} ({{ reviews|length }} reviews)</span>
+        </div>
+        {% endif %}
+
+        <div class="book-meta-grid">
+          <div class="meta-chip">
+            <div class="label">Book ID</div>
+            <div class="value">{{ book.bid }}</div>
+          </div>
+          <div class="meta-chip">
+            <div class="label">Category</div>
+            <div class="value">{{ book.bcategory }}</div>
+          </div>
+          <div class="meta-chip">
+            <div class="label">Total Copies</div>
+            <div class="value">{{ book.total_copies }}</div>
+          </div>
+          <div class="meta-chip">
+            <div class="label">Available</div>
+            <div class="value" style="color:{% if book.available > 0 %}#2d6a4f{% else %}#c0392b{% endif %}">
+              {{ book.available }}
+            </div>
+          </div>
+        </div>
+
+        {% if book.description %}
+        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.7;margin-top:16px">
+          {{ book.description }}
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⭐ Reviews</span>
+      </div>
+      <div class="card-body">
+        {% if current_user.is_authenticated and not current_user.is_admin %}
+        <form action="{{ url_for('main.add_review', book_id=book.id) }}" method="POST" style="margin-bottom:20px">
+          <div class="form-group">
+            <label class="form-label">Your Rating</label>
+            <div class="stars" id="starRating" style="font-size:1.6rem;margin-bottom:12px">
+              {% for i in range(1,6) %}
+              <span class="star" onclick="setRating({{ i }})">★</span>
+              {% endfor %}
+            </div>
+            <input type="hidden" name="rating" id="ratingVal" value="3" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your Comment</label>
+            <textarea class="form-control" name="comment" rows="3"
+                      placeholder="What did you think of this book?" style="resize:vertical"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fas fa-paper-plane"></i> Submit Review
+          </button>
+        </form>
+        {% endif %}
+
+        {% if reviews %}
+          {% for r in reviews %}
+          <div class="review-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <span class="reviewer">{{ r.user.fname }}</span>
+              <span>{% for i in range(r.rating) %}⭐{% endfor %}</span>
+            </div>
+            {% if r.comment %}<p class="comment">{{ r.comment }}</p>{% endif %}
+            <p style="font-size:0.7rem;color:var(--text-muted);margin-top:6px">
+              {{ r.created_at.strftime('%d %b %Y') }}
+            </p>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p style="color:var(--text-muted);font-size:0.87rem;text-align:center;padding:20px">
+            No reviews yet. Be the first to review!
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Actions -->
+  <div style="position:sticky;top:80px">
+    <div class="card">
+      <div class="card-body" style="text-align:center">
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px">
+          <span style="color:{% if book.available > 0 %}#2d6a4f{% else %}#c0392b{% endif %};font-weight:700;font-size:1rem">
+            {% if book.available > 0 %}✅ Available{% else %}❌ Not Available{% endif %}
+          </span>
+          <br>{{ book.available }} of {{ book.total_copies }} copies free
+        </div>
+
+        {% if current_user.is_authenticated and not current_user.is_admin %}
+          {% if book.available > 0 %}
+          <form action="{{ url_for('main.issue_book', book_id=book.id) }}" method="POST">
+            <button type="submit" class="btn btn-primary"
+                    style="width:100%;justify-content:center;padding:13px;">
+              <i class="fas fa-bookmark"></i> Borrow This Book
+            </button>
+          </form>
+          {% else %}
+          <button class="btn" style="width:100%;justify-content:center;padding:13px;opacity:0.5;cursor:not-allowed;background:var(--bg-secondary);border:1px solid var(--border-color)" disabled>
+            Currently Unavailable
+          </button>
+          {% endif %}
+        {% elif not current_user.is_authenticated %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-primary"
+             style="width:100%;justify-content:center;padding:13px;">
+            <i class="fas fa-sign-in-alt"></i> Login to Borrow
+          </a>
+        {% endif %}
+
+        <a href="{{ url_for('main.search') }}"
+           class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-top:10px">
+          <i class="fas fa-arrow-left"></i> Back to Search
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setRating(val) {
+  document.getElementById('ratingVal').value = val;
+  document.querySelectorAll('#starRating .star').forEach((s, i) => {
+    s.classList.toggle('filled', i < val);
+  });
+}
+setRating(3);
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Borrow History — E-Library{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>📋 Borrow History</h1>
+    <div class="breadcrumb">
+      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+      History
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">All Borrowed Books</span>
+    <span class="badge badge-info">{{ records|length }} records</span>
+  </div>
+  <div class="table-wrap">
+    {% if records %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Book Name</th>
+          <th>Author</th>
+          <th>Category</th>
+          <th>Borrowed On</th>
+          <th>Returned On</th>
+          <th>Fine</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td style="color:var(--text-muted)">{{ loop.index }}</td>
+          <td><strong>{{ r.book.bname }}</strong></td>
+          <td>{{ r.book.aname }}</td>
+          <td><span class="badge badge-info">{{ r.book.bcategory }}</span></td>
+          <td>{{ r.borrowed_on }}</td>
+          <td>{{ r.returned_on or '—' }}</td>
+          <td>
+            {% if r.fine_amount > 0 %}
+              <span class="badge badge-danger">₹{{ "%.2f"|format(r.fine_amount) }}</span>
+            {% else %}
+              <span class="badge badge-success">None</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="text-align:center;padding:60px;color:var(--text-muted)">
+      <div style="font-size:3rem;margin-bottom:14px">📭</div>
+      <p>No borrowing history yet.</p>
+      <a href="{{ url_for('main.search') }}" class="btn btn-primary btn-sm" style="margin-top:12px">
+        Browse Books
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
